@@ -72,7 +72,7 @@ export const SidebarToggle = () => {
         </DialogContent>
       </Dialog>
       <Link
-        href={"/ask"}
+        href={"/slides"}
         className="hover:bg-muted flex size-7 items-center justify-center rounded-lg"
       >
         <PlusIcon weight="bold" className={open ? "invisible" : "flex"} />

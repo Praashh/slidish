@@ -12,10 +12,12 @@ const SLIDE_W = 1920;
 const SLIDE_H = 1080;
 
 const markdownComponents: Components = {
-    h3: ({ node, ...props }) => <h3 className="text-[48px] font-semibold mb-6 text-(--slide-text) opacity-90" {...props} />,
-    p: ({ node, ...props }) => <p className="text-[36px] leading-[1.6] text-slate-400 mb-6" {...props} />,
-    ul: ({ node, ...props }) => <ul className="text-[32px] leading-[1.8] text-slate-400 pl-12 mb-6 list-disc marker:text-indigo-400" {...props} />,
-    ol: ({ node, ...props }) => <ol className="text-[32px] leading-[1.8] text-slate-400 pl-12 mb-6 list-decimal marker:text-indigo-400 marker:font-semibold" {...props} />,
+    h1: ({ node, ...props }) => <h1 className="text-[120px] font-bold mb-10 text-white tracking-[-4px]" {...props} />,
+    h2: ({ node, ...props }) => <h2 className="text-[72px] font-bold mb-8 text-white tracking-[-2px]" {...props} />,
+    h3: ({ node, ...props }) => <h3 className="text-[48px] font-semibold mb-6 text-white opacity-90" {...props} />,
+    p: ({ node, ...props }) => <p className="text-[36px] leading-[1.6] text-zinc-300 mb-6" {...props} />,
+    ul: ({ node, ...props }) => <ul className="text-[32px] leading-[1.8] text-zinc-300 pl-12 mb-6 list-disc marker:text-indigo-400" {...props} />,
+    ol: ({ node, ...props }) => <ol className="text-[32px] leading-[1.8] text-zinc-300 pl-12 mb-6 list-decimal marker:text-indigo-400 marker:font-semibold" {...props} />,
     li: ({ node, ...props }) => <li className="mb-4 relative" {...props} />,
     strong: ({ node, ...props }) => <strong className="text-white font-semibold" {...props} />,
     em: ({ node, ...props }) => <em className="text-indigo-300 italic" {...props} />,
@@ -79,7 +81,7 @@ function SlideInner({ data, id, index, totalSlides }: SlideProps) {
     return (
         <article
             className={cn(
-                "w-[1920px] h-[1080px] bg-(--slide-bg) rounded-none overflow-hidden relative flex flex-col font-[family-name:var(--slide-font-main),system-ui,sans-serif] text-(--slide-text) shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] transition-all duration-500 ease-in-out mx-auto",
+                "w-[1920px] h-[1080px] bg-(--slide-bg) rounded-none overflow-hidden relative flex flex-col font-[family-name:var(--slide-font-main),system-ui,sans-serif] text-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] transition-all duration-500 ease-in-out mx-auto",
                 data.template === "title" && "justify-center items-center text-center",
                 data.template === "quote" && "justify-center"
             )}
@@ -119,12 +121,12 @@ function SlideInner({ data, id, index, totalSlides }: SlideProps) {
                     <>
                         <div className="flex flex-col items-center justify-center h-full text-center relative">
                             {data.title && (
-                                <h1 className="font-[family-name:var(--slide-font-heading),var(--slide-font-main),sans-serif] text-[140px] font-bold leading-[1.1] mb-8 text-[#ffffff] tracking-[-4px] animate-slide-in fill-mode-both delay-100 drop-shadow-sm">
+                                <h1 className="font-[family-name:var(--slide-font-heading),var(--slide-font-main),sans-serif] text-[140px] font-bold leading-[1.1] mb-8 text-white! tracking-[-4px] animate-slide-in fill-mode-both delay-100 drop-shadow-sm">
                                     {data.title}
                                 </h1>
                             )}
                             {data.subtitle && (
-                                <p className="text-[42px] text-zinc-400 font-medium tracking-[4px] uppercase animate-slide-in fill-mode-both delay-200">
+                                <p className="text-[42px] text-zinc-300 font-medium tracking-[4px] uppercase animate-slide-in fill-mode-both delay-200">
                                     {data.subtitle}
                                 </p>
                             )}
@@ -148,7 +150,7 @@ function SlideInner({ data, id, index, totalSlides }: SlideProps) {
                 ) : data.template === "code" ? (
                     <div className="flex-1 flex flex-col gap-10">
                         {data.title && (
-                            <h2 className="font-[family-name:var(--slide-font-heading),var(--slide-font-main),sans-serif] text-[64px] font-semibold leading-[1.2] mb-10 text-[#ffffff] opacity-95 tracking-[-1px] animate-slide-in fill-mode-both delay-100">
+                            <h2 className="font-[family-name:var(--slide-font-heading),var(--slide-font-main),sans-serif] text-[64px] font-semibold leading-[1.2] mb-10 text-white! opacity-95 tracking-[-1px] animate-slide-in fill-mode-both delay-100">
                                 {data.title}
                             </h2>
                         )}
@@ -169,7 +171,7 @@ function SlideInner({ data, id, index, totalSlides }: SlideProps) {
                     <>
                         {data.title && (
                             <h2 className={cn(
-                                "font-[family-name:var(--slide-font-heading),var(--slide-font-main),sans-serif] text-[72px] font-bold leading-[1.2] mb-12 text-[#ffffff] border-b border-white/5 pb-8 tracking-[-1px] animate-slide-in fill-mode-both delay-100"
+                                "font-[family-name:var(--slide-font-heading),var(--slide-font-main),sans-serif] text-[72px] font-bold leading-[1.2] mb-12 text-white! border-b border-white/5 pb-8 tracking-[-1px] animate-slide-in fill-mode-both delay-100"
                             )}>
                                 {data.title}
                             </h2>

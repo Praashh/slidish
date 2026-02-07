@@ -116,30 +116,6 @@ export default function LibraryPage() {
                         </motion.div>
                     ))}
                 </div>
-
-                {/* Bottom CTA */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8 }}
-                    className="bg-zinc-900 rounded-[3rem] p-12 text-center relative overflow-hidden"
-                >
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-orange-600/20 blur-[100px] rounded-full" />
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full" />
-
-                    <h2 className="text-3xl font-bold text-white mb-4 relative z-10">
-                        Want something unique?
-                    </h2>
-                    <p className="text-zinc-400 mb-8 max-w-lg mx-auto relative z-10">
-                        Use our AI prompt to generate a completely custom presentation from scratch.
-                    </p>
-                    <button
-                        onClick={() => router.push("/slides")}
-                        className="bg-orange-600 hover:bg-orange-500 text-white px-8 py-3 rounded-full font-bold transition-all hover:scale-105 active:scale-95 relative z-10"
-                    >
-                        Try AI Generator
-                    </button>
-                </motion.div>
             </div>
         </SidebarInset>
     );

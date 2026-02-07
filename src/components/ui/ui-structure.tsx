@@ -161,7 +161,7 @@ export function UIStructure({ refreshTrigger }: UIStructureProps) {
               <Button
                 onClick={(e) => {
                   e.preventDefault();
-                  router.push("/ask");
+                  router.push("/slides");
                 }}
                 className="w-full bg-[#d97706] hover:bg-[#d97706]/90"
               >
