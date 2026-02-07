@@ -22,7 +22,7 @@ const AUTH_COOKIE_NAME = "auth_token";
 export function SignInForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl") || "/ask";
+    const callbackUrl = searchParams.get("callbackUrl") || "/slides";
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");

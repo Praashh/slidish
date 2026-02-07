@@ -209,7 +209,7 @@
   /* Complex gradients and patterns */
   .slide-grain-overlay {
     @apply absolute inset-0 pointer-events-none z-10 mix-blend-overlay opacity-[0.03];
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg '%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
 
   .slide-mesh-gradient {
@@ -242,5 +242,195 @@
 
   .reveal .slides {
     @apply inset-0;
+  }
+
+  /* ============================================
+     PRINT MODE STYLES - CRITICAL FOR PDF EXPORT
+     ============================================ */
+  
+  /* Print container - ensures full width/height */
+  .print-container {
+    width: 100%;
+    min-height: 100vh;
+    background: white;
+    overflow: visible;
+  }
+
+  /* Reveal.js print mode overrides */
+  .reveal-canvas.print-mode {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  .reveal-canvas.print-mode .reveal {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .reveal-canvas.print-mode .slides {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    transform-style: flat !important;
+    overflow: visible !important;
+  }
+
+  .reveal-canvas.print-mode .slides section {
+    position: relative !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+    width: 100% !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+  }
+
+  /* Hide navigation elements in print mode */
+  .reveal-canvas.print-mode .controls,
+  .reveal-canvas.print-mode .progress,
+  .reveal-canvas.print-mode .slide-number,
+  .reveal-canvas.print-mode .playback {
+    display: none !important;
+  }
+
+  /* Ensure slides don't get cut off */
+  @media print {
+    @page {
+      size: 1920px 1080px;
+      margin: 0;
+    }
+
+    body {
+      background: white;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    .print-container {
+      width: 100%;
+      height: auto;
+    }
+
+    .reveal-canvas.print-mode .slides section {
+      height: 100vh !important;
+      page-break-after: always !important;
+      page-break-inside: avoid !important;
+    }
+
+    /* Hide UI elements when printing */
+    .no-print,
+    .sidebar,
+    .controls,
+    .progress {
+      display: none !important;
+    }
+  }
+}
+/* 
+
+/* Apply when print-pdf class is present */
+html.print-pdf,
+body.print-pdf {
+  width: 100% !important;
+  height: auto !important;
+  overflow: visible !important;
+  background: white !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Disable all animations and transitions for print */
+html.print-pdf *,
+body.print-pdf * {
+  animation: none !important;
+  transition: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  opacity: 1 !important; /* Force visibility of animated elements */
+}
+
+/* Ensure slides always start on a new page */
+.print-container {
+  width: 100%;
+  display: block;
+}
+
+.print-container article {
+  page-break-after: always !important;
+  page-break-inside: avoid !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Hide Reveal.js UI elements */
+
+.reveal-canvas.print-mode {
+  height: auto !important;
+  overflow: visible !important;
+  background: white !important;
+}
+
+/* Media print overrides */
+@media print {
+  @page {
+    size: 1920px 1080px;
+    margin: 0;
+  }
+
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  .reveal {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .reveal .slides {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  .reveal .slides section {
+    position: relative !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+    transform: none !important;
+  }
+
+  .reveal .slides section:not(.present) {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Ensure backgrounds print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }

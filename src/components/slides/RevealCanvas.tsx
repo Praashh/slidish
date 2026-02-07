@@ -114,8 +114,21 @@ function RevealCanvasInner({ className = "" }: RevealCanvasProps) {
         }
     }, [slides]);
 
+    useEffect(() => {
+        if (isPrintMode) {
+            document.body.classList.add("print-pdf");
+            return () => {
+                document.body.classList.remove("print-pdf");
+            };
+        }
+    }, [isPrintMode]);
+
     return (
-        <div className={cn("reveal-canvas w-full h-full relative overflow-hidden bg-[#faf9f6]", className)}>
+        <div className={cn(
+            "reveal-canvas w-full h-full relative overflow-hidden bg-[#faf9f6]",
+            isPrintMode && "print-mode",
+            className
+        )}>
             <div className="reveal w-full h-full" ref={deckRef}>
                 <div className="slides">
                     {slides.map((slide, index) => (

@@ -3,11 +3,10 @@
 import { useCallback, useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { SlideEditor, RevealCanvas, SlideControls } from "@/components/slides";
+import { SlideEditor, RevealCanvas, SlideControls, Slide } from "@/components/slides";
 import { useSlidesStore } from "@/lib/slides-store";
 import { parseMarkdownToSlides } from "@/lib/slide-utils";
 
-// Loading fallback for the slides page
 function SlidesLoading() {
     return (
         <div className="w-screen h-screen flex items-center justify-center bg-[#faf9f6]">
@@ -19,7 +18,6 @@ function SlidesLoading() {
     );
 }
 
-// Inner component that uses useSearchParams - must be wrapped in Suspense
 function SlidesPageInner() {
     const { setSlides, setIsGenerating, slides } = useSlidesStore();
     const [error, setError] = useState<string | null>(null);
@@ -27,12 +25,10 @@ function SlidesPageInner() {
     const searchParams = useSearchParams();
     const isPrintMode = searchParams.get("print-pdf") !== null;
 
-    // Handle hydration
     useEffect(() => {
         setHasHydrated(true);
     }, []);
 
-    // Handle AI generation request - wait for complete response
     const handleGenerate = useCallback(
         async (prompt: string) => {
             setIsGenerating(true);
@@ -80,10 +76,20 @@ function SlidesPageInner() {
         [setSlides, setIsGenerating],
     );
 
-    // Auto-trigger print if in print mode
+    useEffect(() => {
+        if (isPrintMode) {
+            document.documentElement.classList.add("print-pdf");
+            document.body.classList.add("print-pdf");
+            return () => {
+                document.documentElement.classList.remove("print-pdf");
+                document.body.classList.remove("print-pdf");
+            };
+        }
+    }, [isPrintMode]);
+
     useEffect(() => {
         if (isPrintMode && slides.length > 0 && hasHydrated) {
-            // Give reveal.js a moment to initialize and layout correctly
+            // Give a moment for styles to apply
             const timer = setTimeout(() => {
                 window.print();
             }, 1000);
@@ -104,9 +110,17 @@ function SlidesPageInner() {
 
     if (isPrintMode) {
         return (
-            <main className="w-full h-full bg-white overflow-visible">
-                <RevealCanvas />
-            </main>
+            <div className="print-container">
+                {slides.map((slide, index) => (
+                    <Slide
+                        key={slide.id}
+                        data={slide}
+                        id={slide.id}
+                        index={index}
+                        totalSlides={slides.length}
+                    />
+                ))}
+            </div>
         );
     }
 
@@ -144,7 +158,6 @@ function SlidesPageInner() {
     );
 }
 
-// Default export wraps the inner component in Suspense to handle useSearchParams
 export default function SlidesPage() {
     return (
         <Suspense fallback={<SlidesLoading />}>
