@@ -1,0 +1,10 @@
+# Robots.txt for Slidish
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://slidish.app/sitemap.xml
+
+# Block sensitive paths
+Disallow: /api/
+Disallow: /_next/
