@@ -4,6 +4,8 @@ import {
     EnvelopeIcon,
     EyeIcon,
     EyeSlashIcon,
+    GoogleLogo,
+    GoogleLogoIcon,
     LockIcon,
     SpinnerGapIcon,
 } from "@phosphor-icons/react";
@@ -13,10 +15,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { signIn } from "next-auth/react";
 
-const VALID_EMAIL = "praash@gmail.com";
-const VALID_PASSWORD = process.env.NEXT_PUBLIC_VALID_PASSWORD;
-const AUTH_COOKIE_NAME = "auth_token";
+
+
 
 
 export function SignInForm() {
@@ -35,25 +37,35 @@ export function SignInForm() {
         setError("");
         setIsLoading(true);
 
-        await new Promise((resolve) => setTimeout(resolve, 800));
-
-        if (email === VALID_EMAIL && password === VALID_PASSWORD) {
-            const expiryDate = new Date();
-            expiryDate.setDate(expiryDate.getDate() + 7);
-            document.cookie = `${AUTH_COOKIE_NAME}=authenticated; path=/; expires=${expiryDate.toUTCString()}; SameSite=Lax`;
-
-            toast.success("Welcome back!", {
-                description: "Redirecting to Slidish...",
+        try {
+            const result = await signIn("credentials", {
+                email,
+                password,
+                redirect: false,
+                callbackUrl,
             });
 
-            setTimeout(() => {
-                router.push(callbackUrl);
-                router.refresh();
-            }, 500);
-        } else {
-            setError("Invalid email or password. Please try again.");
+            if (result?.error) {
+                setError("Invalid email or password. Please try again.");
+                setIsLoading(false);
+            } else {
+                toast.success("Welcome back!", {
+                    description: "Redirecting to Slidish...",
+                });
+
+                setTimeout(() => {
+                    router.push(callbackUrl);
+                    router.refresh();
+                }, 500);
+            }
+        } catch (error) {
+            setError("Something went wrong. Please try again.");
             setIsLoading(false);
         }
+    };
+
+    const handleGoogleSignIn = async () => {
+        await signIn('google', { callbackUrl: '/' });
     };
 
     return (
@@ -180,6 +192,14 @@ export function SignInForm() {
                         </Button>
                     </form>
 
+                    <Button
+                        onClick={handleGoogleSignIn}
+                        className="relative flex h-14 w-full items-center justify-center gap-3 rounded-xl border border-[#e5e5e5] bg-white text-lg font-medium text-[#1a1a1a] shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50 hover:shadow-md mt-10"
+                        variant="ghost"
+                    >
+                        <GoogleLogoIcon weight="bold" className="h-6 w-6" />
+                        Continue with Google
+                    </Button>
                     <div className="mt-8 text-center">
                         <p className="text-xs text-zinc-400">
                             By signing in, you agree to our Terms of Service and Privacy
