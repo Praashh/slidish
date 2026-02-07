@@ -24,7 +24,7 @@ export function proxy(request: NextRequest) {
   }
 
   if (isAuthRoute && authToken) {
-    return NextResponse.redirect(new URL("/ask", request.url));
+    return NextResponse.redirect(new URL("/slides", request.url));
   }
 
   return NextResponse.next();
