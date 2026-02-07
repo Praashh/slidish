@@ -26,6 +26,7 @@ export function SignInForm() {
     const searchParams = useSearchParams();
     const callbackUrl = searchParams.get("callbackUrl") || "/slides";
 
+    const [mode, setMode] = useState<"signin" | "signup">("signin");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -38,6 +39,26 @@ export function SignInForm() {
         setIsLoading(true);
 
         try {
+            if (mode === "signup") {
+                const res = await fetch("/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    setError(data.error || "Failed to create account. Please try again.");
+                    setIsLoading(false);
+                    return;
+                }
+
+                toast.success("Account created successfully!", {
+                    description: "Logging you in...",
+                });
+            }
+
             const result = await signIn("credentials", {
                 email,
                 password,
@@ -46,12 +67,18 @@ export function SignInForm() {
             });
 
             if (result?.error) {
-                setError("Invalid email or password. Please try again.");
+                setError(
+                    mode === "signin"
+                        ? "Invalid email or password. Please try again."
+                        : "Registration successful, but sign-in failed. Please try signing in manually."
+                );
                 setIsLoading(false);
             } else {
-                toast.success("Welcome back!", {
-                    description: "Redirecting to Slidish...",
-                });
+                if (mode === "signin") {
+                    toast.success("Welcome back!", {
+                        description: "Redirecting to Slidish...",
+                    });
+                }
 
                 setTimeout(() => {
                     router.push(callbackUrl);
@@ -102,10 +129,12 @@ export function SignInForm() {
 
                     <div className="text-center mb-8">
                         <h1 className="text-3xl font-bold text-zinc-900 mb-2">
-                            Sign in to continue
+                            {mode === "signin" ? "Sign in to continue" : "Create an account"}
                         </h1>
                         <p className="text-zinc-500">
-                            Enter your credentials to access Slidish
+                            {mode === "signin"
+                                ? "Enter your credentials to access Slidish"
+                                : "Start your journey with Slidish today"}
                         </p>
                     </div>
 
@@ -156,7 +185,11 @@ export function SignInForm() {
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter your password"
+                                    placeholder={
+                                        mode === "signin"
+                                            ? "Enter your password"
+                                            : "Create a strong password"
+                                    }
                                     className="pl-10 pr-10 h-12 rounded-xl border-zinc-200 bg-white focus:border-[#d97706] focus:ring-[#d97706]/20 transition-all"
                                     required
                                     disabled={isLoading}
@@ -184,17 +217,47 @@ export function SignInForm() {
                             {isLoading ? (
                                 <div className="flex items-center gap-2">
                                     <SpinnerGapIcon className="size-5 animate-spin" />
-                                    <span>Signing in...</span>
+                                    <span>
+                                        {mode === "signin" ? "Signing in..." : "Creating account..."}
+                                    </span>
                                 </div>
-                            ) : (
+                            ) : mode === "signin" ? (
                                 "Sign in"
+                            ) : (
+                                "Create account"
                             )}
                         </Button>
                     </form>
 
+                    <div className="mt-6 text-center">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setMode(mode === "signin" ? "signup" : "signin");
+                                setError("");
+                            }}
+                            className="text-sm font-medium text-[#d97706] hover:text-[#b45309] transition-colors"
+                        >
+                            {mode === "signin"
+                                ? "Don't have an account? Sign up"
+                                : "Already have an account? Sign in"}
+                        </button>
+                    </div>
+
+                    <div className="relative mt-8">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-zinc-200" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-[#faf9f6] px-2 text-zinc-400">
+                                Or continue with
+                            </span>
+                        </div>
+                    </div>
+
                     <Button
                         onClick={handleGoogleSignIn}
-                        className="relative flex h-14 w-full items-center justify-center gap-3 rounded-xl border border-[#e5e5e5] bg-white text-lg font-medium text-[#1a1a1a] shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50 hover:shadow-md mt-10"
+                        className="relative flex h-14 w-full items-center justify-center gap-3 rounded-xl border border-[#e5e5e5] bg-white text-lg font-medium text-[#1a1a1a] shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50 hover:shadow-md mt-6"
                         variant="ghost"
                     >
                         <GoogleLogoIcon weight="bold" className="h-6 w-6" />
