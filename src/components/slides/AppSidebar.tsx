@@ -1,16 +1,8 @@
 "use client";
-
-import * as React from "react";
 import {
     Presentation,
     MagicWand,
-    TextT,
-    Quotes,
-    Code,
-    Image as ImageIcon,
-    Layout,
     Gear,
-    CaretLeft
 } from "@phosphor-icons/react";
 import {
     Sidebar,
@@ -28,9 +20,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 export function AppSidebar() {
     const pathname = usePathname();
+    const { data: session } = useSession();
 
     const menuItems = [
         { title: "Generate", icon: MagicWand, href: "/slides", active: pathname === "/slides" },
@@ -41,38 +36,41 @@ export function AppSidebar() {
 
     return (
         <Sidebar collapsible="icon" className="border-r border-zinc-200 bg-[#faf9f6]">
-            <SidebarHeader className="h-20 flex items-center px-6 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center border-b border-zinc-100">
-                <div className="flex items-center gap-2">
-                    <div className="bg-white rounded-lg w-8 h-8 flex items-center justify-center overflow-hidden shadow-sm border border-zinc-200 shrink-0">
-                        <img
+            <SidebarHeader className="h-20 flex items-center px-4 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center border-b border-zinc-100">
+                <div className="flex items-center gap-3 group-data-[collapsible=icon]:gap-0">
+                    <div className="bg-white rounded-xl w-10 h-10 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 flex items-center justify-center overflow-hidden shadow-sm border border-zinc-200 shrink-0">
+                        <Image
                             src="/logo.png"
                             alt="Slidish Logo"
                             className="w-full h-full object-cover"
+                            width={40}
+                            height={40}
                         />
                     </div>
-                    <span className="font-bold text-lg text-zinc-900 tracking-tight group-data-[collapsible=icon]:hidden">
+                    <span className="font-bold text-xl text-zinc-900 tracking-tight group-data-[collapsible=icon]:hidden">
                         Slidish
                     </span>
                 </div>
             </SidebarHeader>
 
-            <SidebarContent className="px-3 py-4 gap-6">
-                <SidebarGroup>
-                    <SidebarGroupLabel className="px-3 text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-2">
+            <SidebarContent className="px-3 py-4 gap-6 group-data-[collapsible=icon]:px-0">
+                <SidebarGroup className="group-data-[collapsible=icon]:p-0">
+                    <SidebarGroupLabel className="px-3 text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-2 group-data-[collapsible=icon]:hidden">
                         Main
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
-                        <SidebarMenu>
+                        <SidebarMenu className="group-data-[collapsible=icon]:items-center">
                             {menuItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton
                                         asChild
                                         isActive={item.active}
                                         tooltip={item.title}
+                                        size="lg"
                                         className={`transition-all duration-200 ${item.active ? 'bg-orange-50 text-orange-700 font-medium' : 'text-zinc-600 hover:bg-zinc-100'}`}
                                     >
-                                        <Link href={item.href} className="flex items-center gap-3 px-3 py-6 rounded-xl">
-                                            <item.icon weight={item.active ? "fill" : "regular"} size={22} className="shrink-0" />
+                                        <Link href={item.href} className="flex items-center gap-3 px-3 rounded-xl group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0">
+                                            <item.icon weight={item.active ? "fill" : "regular"} size={22} className="shrink-0 group-data-[collapsible=icon]:size-5!" />
                                             <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                                         </Link>
                                     </SidebarMenuButton>
@@ -83,14 +81,21 @@ export function AppSidebar() {
                 </SidebarGroup>
             </SidebarContent>
 
-            <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-2 border-t border-zinc-100">
-                <div className="flex items-center gap-3 px-2 py-3 bg-white/50 border border-zinc-100 rounded-2xl shadow-sm group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-                    <div className="w-10 h-10 rounded-full bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-700 font-bold shrink-0">
-                        PV
+            <SidebarFooter className="p-4 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-4 border-t border-zinc-100">
+                <div className="flex items-center gap-3 px-2 py-3 bg-white/50 border border-zinc-100 rounded-2xl shadow-sm group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:shadow-none">
+                    <div className="w-10 h-10 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 rounded-full bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-700 font-bold shrink-0">
+                        {session?.user.image ? (
+                            <img
+                                src={session.user.image}
+                                className="w-full h-full object-cover rounded-full"
+                            />
+                        ) : (
+                            <span>{session?.user.name?.charAt(0)}</span>
+                        )}
                     </div>
-                    <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-                        <span className="text-sm font-semibold text-zinc-900">Prashant</span>
-                        <Badge variant="secondary" className="w-fit text-[10px] bg-zinc-100 text-zinc-500 hover:bg-zinc-100">PREMIUM</Badge>
+                    <div className="flex flex-col group-data-[collapsible=icon]:hidden overflow-hidden">
+                        <span className="text-sm font-semibold text-zinc-900 truncate">{session?.user.name}</span>
+                        <Badge variant="secondary" className="w-fit text-[10px] bg-orange-50 text-orange-700 hover:bg-orange-50">PREMIUM</Badge>
                     </div>
                 </div>
             </SidebarFooter>
