@@ -11,7 +11,6 @@ export default function TemplatePage() {
     const params = useParams();
     const router = useRouter();
     const { setSlides, setTheme, setPresentationTitle } = useSlidesStore();
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const templateId = params.id as string;
