@@ -42,6 +42,7 @@ import {
 import { Button } from "./button";
 import { Input } from "./input";
 import { Separator } from "./separator";
+import { useSession } from "next-auth/react";
 
 const giest = Geist({
   display: "swap",
@@ -69,11 +70,7 @@ export function UIStructure({ refreshTrigger }: UIStructureProps) {
   const [hoverChatId, setHoverChatId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const user = {
-    name: "Prashant Varma",
-    email: "praash@gmail.com",
-    image: "https://avatars.githubusercontent.com/u/123456789?v=4",
-  };
+  const { data: session } = useSession();
 
   // Fetch chats from IndexedDB
   const fetchChats = useCallback(async () => {
@@ -360,20 +357,20 @@ export function UIStructure({ refreshTrigger }: UIStructureProps) {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarFooter className="bg-background absolute bottom-0 z-70 h-24 w-full px-4 py-3">
-          {user && (
+          {session && (
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <img
-                  src={user.image ?? "/default-avatar.png"}
-                  alt={user.name ?? "User"}
+                  src={session.user.image ?? "/default-avatar.png"}
+                  alt={session.user.name ?? "User"}
                   className="h-10 w-10 rounded-full object-cover"
                 />
                 <div className="flex flex-col text-sm">
                   <span className="font-medium text-zinc-900">
-                    {user.name ?? "Anonymous"}
+                    {session.user.name ?? "Anonymous"}
                   </span>
                   <span className="w-36 truncate text-xs text-zinc-500">
-                    {user.email ?? ""}
+                    {session.user.email ?? ""}
                   </span>
                 </div>
               </div>
