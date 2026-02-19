@@ -1,5 +1,12 @@
+import { auth } from "@/auth";
+import { prisma } from "@/db";
 import { chat } from "@tanstack/ai";
 import { openaiText } from "@tanstack/ai-openai";
+
+if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY is not configured");
+}
+
 
 const SLIDE_GENERATION_SYSTEM_PROMPT = `You are an expert presentation designer. Create professional, engaging slides based on the user's request.
 
@@ -50,72 +57,72 @@ Start your AI journey today!
 Now create slides based on the user's request:`;
 
 export async function POST(request: Request) {
-    if (!process.env.OPENAI_API_KEY) {
+    const session = await auth();
+    if (!session || !session.user) {
         return Response.json(
-            { error: "OPENAI_API_KEY not configured" },
-            { status: 500 }
+            { error: "Unauthorized" },
+            { status: 401 },
         );
     }
 
     try {
         const body = await request.json();
-
-        // Extract prompt from various formats
-        let prompt = "";
-        if (body.prompt && typeof body.prompt === "string") {
-            prompt = body.prompt;
-        } else if (body.messages && Array.isArray(body.messages)) {
-            const lastUserMessage = [...body.messages].reverse().find((m: { role: string }) => m.role === "user");
-            if (lastUserMessage?.parts) {
-                prompt = lastUserMessage.parts
-                    .filter((p: { type: string }) => p.type === "text")
-                    .map((p: { content: string }) => p.content)
-                    .join("\n");
-            } else if (lastUserMessage?.content) {
-                prompt = lastUserMessage.content;
-            }
-        }
-
-        if (!prompt.trim()) {
+        const prompt = body.prompt;
+        if (!prompt) {
             return Response.json(
-                { error: "No prompt provided" },
-                { status: 400 }
+                { error: "Invalid Input!" },
+                { status: 403 },
             );
         }
 
-        console.log("[API] Generating slides (non-streaming) for:", prompt);
-
-        // Combine system prompt with user prompt
-        const fullPrompt = `${SLIDE_GENERATION_SYSTEM_PROMPT}\n\nUser request: ${prompt}`;
-
-        // Non-streaming call to OpenAI
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-            },
-            body: JSON.stringify({
-                model: "gpt-4o",
-                messages: [
-                    { role: "user", content: fullPrompt },
-                ],
-                temperature: 0.7,
-                stream: false,
-            }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error("[API] OpenAI Error:", errorData);
-            throw new Error(errorData.error?.message || "Failed to generate slides from OpenAI");
+        let deductResult: { count: number };
+        try {
+            deductResult = await prisma.user.updateMany({
+                where: {
+                    id: session.user.id,
+                    credits: { gt: 0 },
+                },
+                data: {
+                    credits: { decrement: 1 },
+                },
+            });
+        } catch (error) {
+            console.error("[slides] Credit deduction DB error:", error);
+            return Response.json(
+                { error: "Internal Server Error" },
+                { status: 500 },
+            );
         }
 
-        const data = await response.json();
-        const fullText = data.choices[0]?.message?.content || "";
+        if (deductResult.count === 0) {
+            return Response.json(
+                { error: "Insufficient credits" },
+                { status: 400 },
+            );
+        }
+
+        // Non-streaming call using TanStack AI SDK
+        const fullText = await chat({
+            adapter: openaiText("gpt-4o"),
+            systemPrompts: [SLIDE_GENERATION_SYSTEM_PROMPT],
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7,
+            stream: false,
+        });
 
         console.log("[API] Generated text length:", fullText.length);
         console.log("[API] Preview:", fullText.substring(0, 100));
+
+        await prisma.user.update({
+            where: {
+                id: session.user.id
+            },
+            data: {
+                credits: {
+                    decrement: 1
+                }
+            }
+        })
 
         return Response.json({
             success: true,
@@ -123,9 +130,23 @@ export async function POST(request: Request) {
         });
     } catch (error) {
         console.error("[API] Error:", error);
+
+        try {
+            await prisma.user.update({
+                where: { id: session.user.id },
+                data: { credits: { increment: 1 } },
+            });
+        } catch (refundError) {
+            console.error(
+                "[slides] CRITICAL: failed to refund credit for user",
+                session.user.id,
+                refundError
+            );
+        }
+
         return Response.json(
             { error: error instanceof Error ? error.message : "An error occurred" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }

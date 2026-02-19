@@ -104,6 +104,7 @@ function SlideEditorInner({ onGenerate }: SlideEditorProps) {
                     type="text"
                     className="p-0 h-auto text-xl font-bold text-zinc-900 border-none shadow-none focus-visible:ring-0 placeholder:text-zinc-300"
                     value={presentationTitle}
+                    required={true}
                     onChange={(e) => setPresentationTitle(e.target.value)}
                     placeholder="Presentation Title"
                 />

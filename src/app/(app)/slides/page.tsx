@@ -3,9 +3,24 @@
 import { useCallback, useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { SlideEditor, RevealCanvas, SlideControls, Slide } from "@/components/slides";
+import {
+    SlideEditor,
+    RevealCanvas,
+    SlideControls,
+    Slide,
+} from "@/components/slides";
 import { useSlidesStore } from "@/lib/slides-store";
 import { parseMarkdownToSlides } from "@/lib/slide-utils";
+import { toast } from "sonner";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import BuyMeCoffee from "@/components/buy-me-coffee";
 
 function SlidesLoading() {
     return (
@@ -20,7 +35,7 @@ function SlidesLoading() {
 
 function SlidesPageInner() {
     const { setSlides, setIsGenerating, slides } = useSlidesStore();
-    const [error, setError] = useState<string | null>(null);
+    const [showSponsorDialog, setShowSponsorDialog] = useState(false);
     const [hasHydrated, setHasHydrated] = useState(false);
     const searchParams = useSearchParams();
     const isPrintMode = searchParams.get("print-pdf") !== null;
@@ -32,7 +47,6 @@ function SlidesPageInner() {
     const handleGenerate = useCallback(
         async (prompt: string) => {
             setIsGenerating(true);
-            setError(null);
 
             try {
                 console.log("[Slides] Generating with prompt:", prompt);
@@ -48,10 +62,20 @@ function SlidesPageInner() {
                 const data = await response.json();
 
                 if (!response.ok) {
+                    if (
+                        response.status === 400 &&
+                        data.error === "Insufficient credits"
+                    ) {
+                        setShowSponsorDialog(true);
+                        throw new Error("Insufficient credits");
+                    }
                     throw new Error(data.error || "Failed to generate slides");
                 }
 
-                console.log("[Slides] Received markdown:", data.markdown?.substring(0, 200));
+                console.log(
+                    "[Slides] Received markdown:",
+                    data.markdown?.substring(0, 200),
+                );
 
                 // Parse the complete markdown into slides
                 if (data.markdown && data.markdown.trim().length > 0) {
@@ -61,14 +85,16 @@ function SlidesPageInner() {
                     if (parsedSlides.length > 0) {
                         setSlides(parsedSlides);
                     } else {
-                        setError("No slides could be parsed from the response");
+                        throw new Error("No slides could be parsed from the response");
                     }
                 } else {
-                    setError("Empty response from AI");
+                    throw new Error("Empty response from AI");
                 }
             } catch (err) {
                 console.error("Failed to generate slides:", err);
-                setError(err instanceof Error ? err.message : "An error occurred");
+                const errorMessage =
+                    err instanceof Error ? err.message : "An error occurred";
+                toast.error(errorMessage);
             } finally {
                 setIsGenerating(false);
             }
@@ -102,7 +128,9 @@ function SlidesPageInner() {
             <div className="w-screen h-screen flex items-center justify-center bg-[#faf9f6]">
                 <div className="animate-pulse flex flex-col items-center gap-4">
                     <div className="w-12 h-12 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin" />
-                    <p className="text-zinc-400 text-sm font-medium">Preparing slides...</p>
+                    <p className="text-zinc-400 text-sm font-medium">
+                        Preparing slides...
+                    </p>
                 </div>
             </div>
         );
@@ -135,25 +163,28 @@ function SlidesPageInner() {
 
                 {/* Floating Controls */}
                 {slides.length > 0 && <SlideControls />}
-
-                {/* Error display */}
-                {error && (
-                    <div className="slides-page__error fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-red-100 bg-white p-4 shadow-xl">
-                        <span className="text-sm font-medium text-red-600">⚠️ {error}</span>
-                        <button
-                            type="button"
-                            onClick={() => setError(null)}
-                            className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-red-50 text-red-400"
-                            aria-label="Dismiss error"
-                        >
-                            ✕
-                        </button>
-                    </div>
-                )}
             </main>
 
             {/* Editor Panel */}
             <SlideEditor onGenerate={handleGenerate} />
+
+            <Dialog open={showSponsorDialog} onOpenChange={setShowSponsorDialog}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Insufficient Credits</DialogTitle>
+                        <DialogDescription>
+                            Please support us by buying a coffee to get more credits!
+                            <p className="text-red-800 text-sm mt-2">Note: This is a paid feature. in $5 you will get 20 credits. and
+                                each slide generation costs 1 credit. After sponsor mail at{" "}
+                                <a href="mailto:hello.praash@gmail.com">hello.praash@gmail.com</a>
+                            </p>
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-center py-4">
+                        <BuyMeCoffee classname="w-full max-w-sm m-0 p-4 h-auto" />
+                    </div>
+                </DialogContent>
+            </Dialog>
         </SidebarInset>
     );
 }
@@ -165,4 +196,3 @@ export default function SlidesPage() {
         </Suspense>
     );
 }
-

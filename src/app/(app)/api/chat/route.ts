@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   try {
     // Create a streaming chat response
     const stream = chat({
-      adapter: openaiText("gpt-5.2"),
+      adapter: openaiText("gpt-4o"),
       messages,
       conversationId,
     });
