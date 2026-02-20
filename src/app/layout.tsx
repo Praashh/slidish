@@ -71,7 +71,7 @@ export const metadata: Metadata = {
       "Create stunning, professional presentations in seconds with AI. No design skills needed.",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og.png",
         width: 1200,
         height: 630,
         alt: "Slidish - AI Powered Presentation Designer",
@@ -83,8 +83,8 @@ export const metadata: Metadata = {
     title: "Slidish - AI Powered Presentation Designer",
     description:
       "Create stunning, professional presentations in seconds with AI.",
-    images: ["/og-image.png"],
-    creator: "@slidish",
+    images: ["/og.png"],
+    creator: "@10xpraash",
   },
   icons: {
     icon: "/favicon.ico",
