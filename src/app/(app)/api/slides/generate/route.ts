@@ -113,17 +113,6 @@ export async function POST(request: Request) {
         console.log("[API] Generated text length:", fullText.length);
         console.log("[API] Preview:", fullText.substring(0, 100));
 
-        await prisma.user.update({
-            where: {
-                id: session.user.id
-            },
-            data: {
-                credits: {
-                    decrement: 1
-                }
-            }
-        })
-
         return Response.json({
             success: true,
             markdown: fullText,

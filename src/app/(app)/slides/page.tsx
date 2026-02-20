@@ -2,6 +2,7 @@
 
 import { useCallback, useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import {
     SlideEditor,
@@ -35,6 +36,7 @@ function SlidesLoading() {
 
 function SlidesPageInner() {
     const { setSlides, setIsGenerating, slides } = useSlidesStore();
+    const { update } = useSession();
     const [showSponsorDialog, setShowSponsorDialog] = useState(false);
     const [hasHydrated, setHasHydrated] = useState(false);
     const searchParams = useSearchParams();
@@ -84,6 +86,7 @@ function SlidesPageInner() {
 
                     if (parsedSlides.length > 0) {
                         setSlides(parsedSlides);
+                        update();
                     } else {
                         throw new Error("No slides could be parsed from the response");
                     }

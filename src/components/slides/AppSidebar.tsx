@@ -3,6 +3,7 @@ import {
     Presentation,
     MagicWand,
     Gear,
+    Coin,
 } from "@phosphor-icons/react";
 import {
     Sidebar,
@@ -26,6 +27,7 @@ import Image from "next/image";
 export function AppSidebar() {
     const pathname = usePathname();
     const { data: session } = useSession();
+    console.log("session", session)
 
     const menuItems = [
         { title: "Generate", icon: MagicWand, href: "/slides", active: pathname === "/slides" },
@@ -84,18 +86,22 @@ export function AppSidebar() {
             <SidebarFooter className="p-4 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-4 border-t border-zinc-100">
                 <div className="flex items-center gap-3 px-2 py-3 bg-white/50 border border-zinc-100 rounded-2xl shadow-sm group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:shadow-none">
                     <div className="w-10 h-10 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 rounded-full bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-700 font-bold shrink-0">
-                        {session?.user.image ? (
-                            <img
-                                src={session.user.image}
-                                className="w-full h-full object-cover rounded-full"
-                            />
-                        ) : (
-                            <span>{session?.user.name?.charAt(0)}</span>
-                        )}
+
+                        <img
+                            src={session?.user.image ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLJC6Y2UkIf05Ojg1pz50dxR6Ud9z_Q4wCqQ&s"}
+                            className="w-full h-full object-cover rounded-full"
+                        />
+
                     </div>
-                    <div className="flex flex-col group-data-[collapsible=icon]:hidden overflow-hidden">
-                        <span className="text-sm font-semibold text-zinc-900 truncate">{session?.user.name}</span>
-                        <Badge variant="secondary" className="w-fit text-[10px] bg-orange-50 text-orange-700 hover:bg-orange-50">PREMIUM</Badge>
+                    <div className="flex flex-col group-data-[collapsible=icon]:hidden overflow-hidden justify-center">
+                        <span className="text-sm font-semibold text-zinc-900 truncate leading-tight">{session?.user.name}</span>
+                        <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="secondary" className="w-fit text-[10px] px-1.5 py-0 h-4 bg-orange-50 text-orange-700 hover:bg-orange-50">PREMIUM</Badge>
+                            <div className="flex items-center gap-1 text-xs text-zinc-600 font-medium">
+                                <Coin weight="fill" className="text-amber-500" size={14} />
+                                <span>{session?.user.credits ?? 0} Credits</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </SidebarFooter>
