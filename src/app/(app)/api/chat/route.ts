@@ -1,6 +1,7 @@
 import { toServerSentEventsResponse } from "@tanstack/ai";
 import type { StreamChunk } from "@tanstack/ai";
 import Groq from "groq-sdk";
+import type { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -14,7 +15,7 @@ async function* groqChatStream(
 
   const stream = await groq.chat.completions.create({
     model,
-    messages: messages as Array<Groq.ChatCompletionMessageParam>,
+    messages: messages as Array<ChatCompletionMessageParam>,
     stream: true,
   });
 
