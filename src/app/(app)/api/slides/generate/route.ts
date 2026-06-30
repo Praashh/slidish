@@ -1,11 +1,12 @@
 import { auth } from "@/auth";
 import { prisma } from "@/db";
-import { chat } from "@tanstack/ai";
-import { openaiText } from "@tanstack/ai-openai";
+import Groq from "groq-sdk";
 
-if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY is not configured");
+if (!process.env.GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY is not configured");
 }
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 
 const SLIDE_GENERATION_SYSTEM_PROMPT = `You are an expert presentation designer. Create professional, engaging slides based on the user's request.
@@ -101,14 +102,17 @@ export async function POST(request: Request) {
             );
         }
 
-        // Non-streaming call using TanStack AI SDK
-        const fullText = await chat({
-            adapter: openaiText("gpt-4o"),
-            systemPrompts: [SLIDE_GENERATION_SYSTEM_PROMPT],
-            messages: [{ role: "user", content: prompt }],
+        // Non-streaming call using Groq SDK
+        const completion = await groq.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+                { role: "system", content: SLIDE_GENERATION_SYSTEM_PROMPT },
+                { role: "user", content: prompt },
+            ],
             temperature: 0.7,
-            stream: false,
         });
+
+        const fullText = completion.choices[0]?.message?.content ?? "";
 
         console.log("[API] Generated text length:", fullText.length);
         console.log("[API] Preview:", fullText.substring(0, 100));

@@ -45,11 +45,7 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
-  @keyframes mesh-drift {
-    0% { transform: scale(1) translate(0, 0); }
-    100% { transform: scale(1.1) translate(20px, 10px); }
-  }
-  --animate-mesh-drift: mesh-drift 20s ease-in-out infinite alternate;
+  /* mesh-drift removed — using static accents instead */
 
   @keyframes slideIn {
     from {
@@ -212,19 +208,13 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg '%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
 
-  .slide-mesh-gradient {
-    @apply absolute inset-0 pointer-events-none z-0 opacity-[0.15] animate-mesh-drift;
-    background: 
-      radial-gradient(circle at 20% 20%, var(--slide-primary) 0%, transparent 70%),
-      radial-gradient(circle at 80% 80%, var(--slide-secondary) 0%, transparent 70%),
-      radial-gradient(circle at 50% 50%, var(--slide-accent) 0%, transparent 60%);
-    filter: blur(80px);
-  }
-
-  .slide-base-gradient {
-    background-image: 
-      radial-gradient(at 0% 0%, var(--slide-primary-muted, rgba(99, 102, 241, 0.05)) 0, transparent 50%), 
-      radial-gradient(at 100% 100%, var(--slide-secondary-muted, rgba(139, 92, 246, 0.05)) 0, transparent 50%);
+  .slide-title-accent {
+    @apply absolute inset-0 pointer-events-none z-0;
+    background: radial-gradient(
+      ellipse 80% 40% at 50% 100%,
+      color-mix(in srgb, var(--slide-primary), transparent 88%) 0%,
+      transparent 100%
+    );
   }
 
   /* Reveal.js Container Fixes */

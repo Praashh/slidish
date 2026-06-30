@@ -55,21 +55,18 @@ function SlideInner({ data, id, index, totalSlides }: SlideProps) {
     } as CSSProperties), [theme]);
 
     const templateBg = useMemo<CSSProperties>(() => {
-        const primarySoft = "color-mix(in srgb, var(--slide-primary), transparent 92%)";
-        const secondarySoft = "color-mix(in srgb, var(--slide-secondary), transparent 92%)";
-
         switch (data.template) {
             case "title":
                 return {
-                    backgroundImage: `radial-gradient(circle at 0% 0%, ${primarySoft} 0, transparent 50%), radial-gradient(circle at 100% 100%, ${secondarySoft} 0, transparent 50%)`
+                    backgroundImage: `radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--slide-primary), transparent 94%) 0%, transparent 60%)`
                 };
             case "quote":
                 return {
-                    backgroundImage: `radial-gradient(circle at 50% 50%, ${secondarySoft} 0%, transparent 60%)`
+                    backgroundImage: `radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--slide-secondary), transparent 95%) 0%, transparent 70%)`
                 };
             case "code":
                 return {
-                    background: `linear-gradient(135deg, #0a0a14 0%, #0f0f1a 100%)`
+                    background: `linear-gradient(180deg, var(--slide-bg) 0%, color-mix(in srgb, var(--slide-bg), #000 15%) 100%)`
                 };
             case "image":
                 return { padding: 0 };
@@ -95,7 +92,7 @@ function SlideInner({ data, id, index, totalSlides }: SlideProps) {
             <div className="slide-grain-overlay" />
 
             {(data.template === "title") && (
-                <div className="slide-mesh-gradient" />
+                <div className="slide-title-accent" />
             )}
 
             {data.template === "image" && data.imageUrl && (
