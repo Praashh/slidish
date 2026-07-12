@@ -49,11 +49,11 @@ export const useSlidesStore = create<SlidesState>()(
             theme: {
                 primaryColor: "#6366f1",
                 secondaryColor: "#8b5cf6",
-                backgroundColor: "#0f0f1a",
-                textColor: "#f8fafc",
-                accentColor: "#22d3ee",
+                backgroundColor: "#ffffff",
+                textColor: "#1e293b",
+                accentColor: "#06b6d4",
                 fontFamily: "'Inter', sans-serif",
-                headingFont: "'Space Grotesk', sans-serif",
+                headingFont: "'Inter', sans-serif",
             },
             isPresenting: false,
             isGenerating: false,
@@ -150,6 +150,25 @@ export const useSlidesStore = create<SlidesState>()(
         })),
         {
             name: "slides-storage",
+            version: 2,
+            migrate: (persistedState: any, version: number) => {
+                if (version < 2) {
+                    // Reset theme to new default on migration
+                    return {
+                        ...persistedState,
+                        theme: {
+                            primaryColor: "#6366f1",
+                            secondaryColor: "#8b5cf6",
+                            backgroundColor: "#ffffff",
+                            textColor: "#1e293b",
+                            accentColor: "#06b6d4",
+                            fontFamily: "'Inter', sans-serif",
+                            headingFont: "'Inter', sans-serif",
+                        },
+                    };
+                }
+                return persistedState as SlidesState;
+            },
         },
     ),
 );

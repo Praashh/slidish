@@ -27,7 +27,6 @@ import Image from "next/image";
 export function AppSidebar() {
     const pathname = usePathname();
     const { data: session } = useSession();
-    console.log("session", session)
 
     const menuItems = [
         { title: "Generate", icon: MagicWand, href: "/slides", active: pathname === "/slides" },
@@ -37,7 +36,7 @@ export function AppSidebar() {
 
 
     return (
-        <Sidebar collapsible="icon" className="border-r border-zinc-200 bg-[#faf9f6]">
+        <Sidebar collapsible="icon" className="border-r border-zinc-200 bg-white">
             <SidebarHeader className="h-20 flex items-center px-4 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center border-b border-zinc-100">
                 <div className="flex items-center gap-3 group-data-[collapsible=icon]:gap-0">
                     <div className="bg-white rounded-xl w-10 h-10 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 flex items-center justify-center overflow-hidden shadow-sm border border-zinc-200 shrink-0">

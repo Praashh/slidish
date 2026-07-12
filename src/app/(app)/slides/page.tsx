@@ -11,7 +11,7 @@ import {
     Slide,
 } from "@/components/slides";
 import { useSlidesStore } from "@/lib/slides-store";
-import { parseMarkdownToSlides } from "@/lib/slide-utils";
+import { parseJsonSlides, parseMarkdownToSlides } from "@/lib/slide-utils";
 import { toast } from "sonner";
 import {
     Dialog,
@@ -19,16 +19,15 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
-    DialogFooter,
 } from "@/components/ui/dialog";
-import BuyMeCoffee from "@/components/buy-me-coffee";
+import { Button } from "@/components/ui/button";
 
 function SlidesLoading() {
     return (
-        <div className="w-screen h-screen flex items-center justify-center bg-[#faf9f6]">
-            <div className="animate-pulse flex flex-col items-center gap-4">
-                <div className="w-12 h-12 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin" />
-                <p className="text-zinc-400 text-sm font-medium">Preparing slides...</p>
+        <div className="w-screen h-screen flex items-center justify-center bg-[#fafafa]">
+            <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 rounded-full border-2 border-zinc-200 border-t-zinc-800 animate-spin" />
+                <p className="text-zinc-400 text-sm">Loading...</p>
             </div>
         </div>
     );
@@ -37,7 +36,7 @@ function SlidesLoading() {
 function SlidesPageInner() {
     const { setSlides, setIsGenerating, slides } = useSlidesStore();
     const { update } = useSession();
-    const [showSponsorDialog, setShowSponsorDialog] = useState(false);
+    const [showCreditsDialog, setShowCreditsDialog] = useState(false);
     const [hasHydrated, setHasHydrated] = useState(false);
     const searchParams = useSearchParams();
     const isPrintMode = searchParams.get("print-pdf") !== null;
@@ -47,43 +46,40 @@ function SlidesPageInner() {
     }, []);
 
     const handleGenerate = useCallback(
-        async (prompt: string) => {
+        async (options: { prompt: string; audience?: string; tone?: string; slideCount?: number }) => {
             setIsGenerating(true);
 
             try {
-                console.log("[Slides] Generating with prompt:", prompt);
-
                 const response = await fetch("/api/slides/generate", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ prompt }),
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(options),
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    if (
-                        response.status === 400 &&
-                        data.error === "Insufficient credits"
-                    ) {
-                        setShowSponsorDialog(true);
+                    if (response.status === 400 && data.error === "Insufficient credits") {
+                        setShowCreditsDialog(true);
                         throw new Error("Insufficient credits");
                     }
                     throw new Error(data.error || "Failed to generate slides");
                 }
 
-                console.log(
-                    "[Slides] Received markdown:",
-                    data.markdown?.substring(0, 200),
-                );
-
-                // Parse the complete markdown into slides
-                if (data.markdown && data.markdown.trim().length > 0) {
+                // New API returns structured JSON slides
+                if (data.slides && Array.isArray(data.slides)) {
+                    const parsedSlides = parseJsonSlides(data.slides);
+                    if (parsedSlides.length > 0) {
+                        setSlides(parsedSlides);
+                        update();
+                        toast.success(`Generated ${parsedSlides.length} slides`);
+                    } else {
+                        throw new Error("No slides could be parsed from the response");
+                    }
+                }
+                // Fallback for markdown response
+                else if (data.markdown && data.markdown.trim().length > 0) {
                     const parsedSlides = parseMarkdownToSlides(data.markdown);
-                    console.log("[Slides] Parsed slides:", parsedSlides.length);
-
                     if (parsedSlides.length > 0) {
                         setSlides(parsedSlides);
                         update();
@@ -94,15 +90,15 @@ function SlidesPageInner() {
                     throw new Error("Empty response from AI");
                 }
             } catch (err) {
-                console.error("Failed to generate slides:", err);
-                const errorMessage =
-                    err instanceof Error ? err.message : "An error occurred";
-                toast.error(errorMessage);
+                const errorMessage = err instanceof Error ? err.message : "An error occurred";
+                if (errorMessage !== "Insufficient credits") {
+                    toast.error(errorMessage);
+                }
             } finally {
                 setIsGenerating(false);
             }
         },
-        [setSlides, setIsGenerating],
+        [setSlides, setIsGenerating, update],
     );
 
     useEffect(() => {
@@ -118,7 +114,6 @@ function SlidesPageInner() {
 
     useEffect(() => {
         if (isPrintMode && slides.length > 0 && hasHydrated) {
-            // Give a moment for styles to apply
             const timer = setTimeout(() => {
                 window.print();
             }, 1000);
@@ -127,16 +122,7 @@ function SlidesPageInner() {
     }, [isPrintMode, slides.length, hasHydrated]);
 
     if (!hasHydrated) {
-        return (
-            <div className="w-screen h-screen flex items-center justify-center bg-[#faf9f6]">
-                <div className="animate-pulse flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin" />
-                    <p className="text-zinc-400 text-sm font-medium">
-                        Preparing slides...
-                    </p>
-                </div>
-            </div>
-        );
+        return <SlidesLoading />;
     }
 
     if (isPrintMode) {
@@ -156,9 +142,9 @@ function SlidesPageInner() {
     }
 
     return (
-        <SidebarInset className="flex w-full flex-row overflow-hidden bg-[#faf9f6] rounded-none">
+        <SidebarInset className="flex w-full flex-row overflow-hidden bg-[#f5f5f5] rounded-none">
             {/* Canvas Area */}
-            <main className="relative flex-1 bg-linear-to-b from-[#faf9f6] to-[#f5f4ef] bg-[radial-gradient(circle_at_20%_80%,rgba(217,119,6,0.03)_0%,transparent_40%),radial-gradient(circle_at_80%_20%,rgba(217,119,6,0.03)_0%,transparent_40%)]">
+            <main className="relative flex-1 bg-[#f5f5f5]">
                 <div className="absolute top-4 left-4 z-50">
                     <SidebarTrigger />
                 </div>
@@ -171,20 +157,29 @@ function SlidesPageInner() {
             {/* Editor Panel */}
             <SlideEditor onGenerate={handleGenerate} />
 
-            <Dialog open={showSponsorDialog} onOpenChange={setShowSponsorDialog}>
-                <DialogContent className="sm:max-w-md">
+            {/* Credits Dialog */}
+            <Dialog open={showCreditsDialog} onOpenChange={setShowCreditsDialog}>
+                <DialogContent className="sm:max-w-sm">
                     <DialogHeader>
-                        <DialogTitle>Insufficient Credits</DialogTitle>
-                        <DialogDescription>
-                            Please support us by buying a coffee to get more credits!
-                            <p className="text-red-800 text-sm mt-2">Note: This is a paid feature. in $5 you will get 20 credits. and
-                                each slide generation costs 1 credit. After sponsor mail at{" "}
-                                <a href="mailto:hello.praash@gmail.com">hello.praash@gmail.com</a>
-                            </p>
+                        <DialogTitle>Out of Credits</DialogTitle>
+                        <DialogDescription className="pt-2">
+                            You've used all your generation credits. Purchase more to continue creating presentations.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="flex justify-center py-4">
-                        <BuyMeCoffee classname="w-full max-w-sm m-0 p-4 h-auto" />
+                    <div className="pt-2 space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-zinc-50 rounded-lg border border-zinc-200">
+                            <div>
+                                <p className="text-sm font-medium text-zinc-900">20 Credits</p>
+                                <p className="text-xs text-zinc-500">1 credit per generation</p>
+                            </div>
+                            <span className="text-lg font-bold text-zinc-900">$5</span>
+                        </div>
+                        <p className="text-xs text-zinc-500">
+                            After purchase, email <a href="mailto:hello.praash@gmail.com" className="underline">hello.praash@gmail.com</a> for activation.
+                        </p>
+                        <Button className="w-full" onClick={() => setShowCreditsDialog(false)}>
+                            Got it
+                        </Button>
                     </div>
                 </DialogContent>
             </Dialog>

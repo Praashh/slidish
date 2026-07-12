@@ -55,11 +55,11 @@ export interface PresentationTheme {
 export const DEFAULT_THEME: PresentationTheme = {
     primaryColor: "#6366f1",
     secondaryColor: "#8b5cf6",
-    backgroundColor: "#0f0f1a",
-    textColor: "#f8fafc",
-    accentColor: "#22d3ee",
+    backgroundColor: "#ffffff",
+    textColor: "#1e293b",
+    accentColor: "#06b6d4",
     fontFamily: "'Inter', sans-serif",
-    headingFont: "'Space Grotesk', sans-serif",
+    headingFont: "'Inter', sans-serif",
 };
 
 export const SLIDE_WIDTH = 1920;

@@ -125,7 +125,7 @@ function RevealCanvasInner({ className = "" }: RevealCanvasProps) {
 
     return (
         <div className={cn(
-            "reveal-canvas w-full h-full relative overflow-hidden bg-[#faf9f6]",
+            "reveal-canvas w-full h-full relative overflow-hidden bg-[#f5f5f5]",
             isPrintMode && "print-mode",
             className
         )}>
